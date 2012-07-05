@@ -62,7 +62,6 @@ def menu(items, header, x, y, width, height, target_console, background_console,
             draw_menu()
         elif key.vk == tcod.KEY_DOWN:
             selected_index += 0 if selected_index == len(truncated_items) - 1 else 1
-            #selected_index += int(selected_index != len(truncated_items) - 1) and 1 # <- ugly
             draw_menu()
         elif key.vk == tcod.KEY_ENTER:
             return selected_index
