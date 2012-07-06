@@ -1,3 +1,5 @@
+from math import radians
+
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
 LIMIT_FPS = 30
@@ -7,3 +9,5 @@ TRUNCATE_SUFFIX = "..."
 COLOR_VARIATION = 15
 
 MEMORY_TINT = 0.2
+
+FOV_ANGLE = radians(40)

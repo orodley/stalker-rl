@@ -1,4 +1,5 @@
 import copy
+import math
 import random
 import libtcodpy as tcod
 import tile_types
@@ -10,7 +11,7 @@ class Map:
         self.height = len(data)
         self.width = len(data[0])
 
-    def render(self, screen, fov_map, camera_x, camera_y):
+    def render(self, screen, fov_map, camera_x, camera_y, player_x, player_y, mouse_x, mouse_y):
         tcod.console_clear(screen)
 
         for y in xrange(constant.SCREEN_HEIGHT):
@@ -19,7 +20,26 @@ class Map:
             for x in xrange(constant.SCREEN_WIDTH):
                 adj_x = x + camera_x
 
-                if tcod.map_is_in_fov(fov_map, adj_x, adj_y):
+                p = math.sqrt((adj_x    - mouse_x)  ** 2 + (adj_y    - mouse_y)  ** 2)
+                s = math.sqrt((player_x - mouse_x)  ** 2 + (player_y - mouse_y)  ** 2)
+                m = math.sqrt((adj_x    - player_x) ** 2 + (adj_y    - player_y) ** 2)
+
+                if p != 0 and s != 0 and m != 0:
+                    try:
+                        angle = math.acos((p ** 2 - s ** 2 - m ** 2) / (-2 * s * m))
+                    except:
+                        pass
+                else:
+                    angle = 0
+
+#               # S   <- (x, y)                cosine rule used to find P; angle between
+#               |\ m                           s and m. If this angle is > FOV_ANGLE / 2,
+#             p | # P <- (player_x, player_y)  the square s is out of vision
+#               |/ s
+#               # M   <- (mouse_x, mouse_y)
+
+                if (tcod.map_is_in_fov(fov_map, adj_x, adj_y) and
+                        angle < constant.FOV_ANGLE / 2):
                     self.data[adj_y][adj_x].explored = True
 
                     tcod.console_put_char_ex(screen, x, y,

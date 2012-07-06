@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import math
 import libtcodpy as tcod
 
 import game_map
@@ -73,13 +74,12 @@ def play_arena():
         if fov_recompute:
             tcod.map_compute_fov(fov_map, player.x, player.y, VISION_RANGE, True, tcod.FOV_SHADOW)
 
+        mouse_status = tcod.mouse_get_status()
 
-        the_map.render(game_con, fov_map, camera_x, camera_y)
+        the_map.render(game_con, fov_map, camera_x, camera_y, player.x, player.y, mouse_status.cx, mouse_status.cy)
 
         for _entity in entity_list:
             _entity.render(game_con, camera_x, camera_y)
-
-        #tcod.console_print_right(game_con, constant.SCREEN_WIDTH - 1, 0, tcod.BKGND_NONE, tcod.sys_get_fps())
 
         tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
         tcod.console_flush()
