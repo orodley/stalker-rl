@@ -49,8 +49,8 @@ class Map:
                 elif self.data[adj_y][adj_x].explored:
                     tcod.console_put_char_ex(screen, x, y,
                                              ord(self.data[adj_y][adj_x].char),
-                                             self.data[adj_y][adj_x].fore_color * constant.MEMORY_TINT,
-                                             self.data[adj_y][adj_x].back_color * constant.MEMORY_TINT)
+                                             self.data[adj_y][adj_x].explored_fore_color,
+                                             self.data[adj_y][adj_x].explored_back_color)
                 else:
                     tcod.console_set_back(screen, x, y, tcod.black)
 
@@ -79,6 +79,9 @@ class Tile:
         self.fore_color.r = random.randrange(r_min, r_max + 1)
         self.fore_color.g = random.randrange(g_min, g_max + 1)
         self.fore_color.b = random.randrange(b_min, b_max + 1)
+
+        self.explored_fore_color = self.fore_color * constant.MEMORY_TINT
+        self.explored_back_color = self.back_color * constant.MEMORY_TINT
 
         self.is_walkable = is_walkable
         self.is_transparent = is_transparent

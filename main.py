@@ -2,6 +2,7 @@
 
 import os
 import math
+import cProfile
 import libtcodpy as tcod
 
 import game_map
