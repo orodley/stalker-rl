@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import random
 import math
 import cProfile
 import libtcodpy as tcod
@@ -54,15 +55,35 @@ def update_fov(a_map, fov_map):
         for x in xrange(a_map.width):
             tcod.map_set_properties(fov_map, x, y, a_map.data[y][x].is_transparent,
                                                    a_map.data[y][x].is_walkable)
-
     return fov_map
+
+def update_entity_fov(entity_list, a_map, fov_map):
+    for _entity in entity_list:
+        tcod.map_set_properties(fov_map, _entity.x, _entity.y,
+                                _entity.is_transparent and a_map.data[_entity.y][_entity.x].is_transparent,
+                                _entity.is_walkable and a_map.data[_entity.y][_entity.x].is_walkable)
+    return fov_map
+
+def check_collision(x, y, a_map, entity_list):
+    if not a_map.data[y][x].is_walkable:
+        return True
+
+    for _entity in entity_list:
+        if _entity.x == x and _entity.y == y:
+            return True
+
+    return False
 
 def play_arena():
     the_map = game_map.make_map(constant.SCREEN_WIDTH + 10, constant.SCREEN_HEIGHT + 10)
     fov_map = tcod.map_new(constant.SCREEN_WIDTH + 10, constant.SCREEN_HEIGHT + 10)
-
     player = entity.Entity(0, 0, "@", tcod.black)
+
     entity_list = [player]
+    for y in xrange(the_map.height):
+        for x in xrange(the_map.width):
+            if random.randint(1,10) == 2:
+                entity_list.append(entity.Entity(x, y, "^", tcod.green, False, False))
     camera_x, camera_y = (0, 0)
 
     fov_map = update_fov(the_map, fov_map)
@@ -74,6 +95,8 @@ def play_arena():
 
         if fov_recompute:
             tcod.map_compute_fov(fov_map, player.x, player.y, VISION_RANGE, True, tcod.FOV_SHADOW)
+
+        update_entity_fov(entity_list, the_map, fov_map)
 
         mouse_status = tcod.mouse_get_status()
 
@@ -89,13 +112,17 @@ def play_arena():
 
         key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
         if key.vk == tcod.KEY_LEFT:
-            player.x -= 0 if player.x == 0 else 1
+            if not check_collision(player.x - 1, player.y, the_map, entity_list):
+                player.x -= 0 if player.x == 0 else 1
         elif key.vk == tcod.KEY_RIGHT:
-            player.x += 0 if player.x == the_map.width else 1
+            if not check_collision(player.x + 1, player.y, the_map, entity_list):
+                player.x += 0 if player.x == the_map.width else 1
         elif key.vk == tcod.KEY_UP:
-            player.y -= 0 if player.y == 0 else 1
+            if not check_collision(player.x, player.y - 1, the_map, entity_list):
+                player.y -= 0 if player.y == 0 else 1
         elif key.vk == tcod.KEY_DOWN:
-            player.y += 0 if player.y == the_map.height else 1
+            if not check_collision(player.x, player.y + 1, the_map, entity_list):
+                player.y += 0 if player.y == the_map.height else 1
         elif key.vk == tcod.KEY_ESCAPE:
             break
         else:

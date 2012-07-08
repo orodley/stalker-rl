@@ -26,9 +26,11 @@ class Map:
 
                 if p != 0 and s != 0 and m != 0:
                     try:
-                        angle = math.acos((p ** 2 - s ** 2 - m ** 2) / (-2 * s * m))
-                    except:
-                        pass
+                        
+                        angle = math.acos(round((p ** 2 - s ** 2 - m ** 2) / (-2 * s * m), 10))
+                    except Exception as ex:
+                        print ex, str(p ** 2 - s ** 2 - m ** 2), str(-2 * s * m), a, str(-1 > a > 1), "p =", str(p), "s =", str(s), "m =", str(m)
+                        continue
                 else:
                     angle = 0
 
@@ -60,10 +62,10 @@ def make_map(width, height):
 class Tile:
     def __init__(self, material, is_walkable, is_transparent):
         self.material = material
-        self.char =  random.choice(tile_types.char[material])
+        self.char =  random.choice(tile_types.data[material][0])
 
-        self.back_color = copy.deepcopy(tile_types.color[material])
-        self.fore_color = copy.deepcopy(tile_types.color[material])
+        self.back_color = copy.deepcopy(tile_types.data[material][1])
+        self.fore_color = copy.deepcopy(tile_types.data[material][1])
 
         r_max = min(255, self.back_color.r + constant.COLOR_VARIATION)
         r_min = max(0, self.back_color.r - constant.COLOR_VARIATION)

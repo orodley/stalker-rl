@@ -10,11 +10,17 @@ class Entity:
     fore_color -- color the character is displayed in
     """
 
-    def __init__(self, x, y, char, fore_color):
+    def __init__(self, x, y, char, fore_color, is_transparent=True, is_walkable=True,
+                    item_component=None):
         self.x = x
         self.y = y
         self.char = char
         self.fore_color = fore_color
+        self.is_transparent = is_transparent
+        self.is_walkable = is_walkable
+
+        if item_component:
+            self.item_component = item_component
 
     def move(self, dx, dy):
         self.x += dx

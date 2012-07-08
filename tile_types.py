@@ -1,5 +1,5 @@
 import libtcodpy as tcod
 
-char = {"grass":"'.,;\""}
-
-color = {"grass":tcod.dark_chartreuse}
+#        name   characters color
+#               to use
+data = {"grass":["'.,;\"", tcod.dark_chartreuse]}
