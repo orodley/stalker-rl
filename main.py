@@ -65,6 +65,9 @@ def update_entity_fov(entity_list, a_map, fov_map):
     return fov_map
 
 def check_collision(x, y, a_map, entity_list):
+    if x == a_map.width or y == a_map.height:
+        return True
+
     if not a_map.data[y][x].is_walkable:
         return True
 
@@ -80,10 +83,7 @@ def play_arena():
     player = entity.Entity(0, 0, "@", tcod.black)
 
     entity_list = [player]
-    for y in xrange(the_map.height):
-        for x in xrange(the_map.width):
-            if random.randint(1,10) == 2:
-                entity_list.append(entity.Entity(x, y, "^", tcod.green, False, False))
+
     camera_x, camera_y = (0, 0)
 
     fov_map = update_fov(the_map, fov_map)
@@ -94,7 +94,7 @@ def play_arena():
                                              the_map.width, the_map.height)
 
         if fov_recompute:
-            tcod.map_compute_fov(fov_map, player.x, player.y, VISION_RANGE, True, tcod.FOV_SHADOW)
+            tcod.map_compute_fov(fov_map, player.x, player.y, VISION_RANGE, True, tcod.FOV_BASIC)
 
         update_entity_fov(entity_list, the_map, fov_map)
 
@@ -102,9 +102,13 @@ def play_arena():
 
         the_map.render(game_con, fov_map, camera_x, camera_y, player.x, player.y, mouse_status.cx, mouse_status.cy)
 
+        tcod.console_print_right(game_con, constant.SCREEN_WIDTH - 1, 0, tcod.BKGND_NONE, str(tcod.sys_get_fps()))
+        
         for _entity in entity_list:
-            _entity.render(game_con, camera_x, camera_y)
-
+            if game_map.in_player_fov(_entity.x, _entity.y, player.x, player.y, mouse_status.cx + camera_x,
+                                      mouse_status.cy + camera_y, fov_map):
+                _entity.render(game_con, camera_x, camera_y)
+        
         tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
         tcod.console_flush()
 

@@ -20,28 +20,8 @@ class Map:
             for x in xrange(constant.SCREEN_WIDTH):
                 adj_x = x + camera_x
 
-                p = math.sqrt((adj_x    - mouse_x)  ** 2 + (adj_y    - mouse_y)  ** 2)
-                s = math.sqrt((player_x - mouse_x)  ** 2 + (player_y - mouse_y)  ** 2)
-                m = math.sqrt((adj_x    - player_x) ** 2 + (adj_y    - player_y) ** 2)
-
-                if p != 0 and s != 0 and m != 0:
-                    try:
-                        
-                        angle = math.acos(round((p ** 2 - s ** 2 - m ** 2) / (-2 * s * m), 10))
-                    except Exception as ex:
-                        print ex, str(p ** 2 - s ** 2 - m ** 2), str(-2 * s * m), a, str(-1 > a > 1), "p =", str(p), "s =", str(s), "m =", str(m)
-                        continue
-                else:
-                    angle = 0
-
-#               # S   <- (x, y)                cosine rule used to find P; angle between
-#               |\ m                           s and m. If this angle is > FOV_ANGLE / 2,
-#             p | # P <- (player_x, player_y)  the square s is out of vision
-#               |/ s
-#               # M   <- (mouse_x, mouse_y)
-
-                if (tcod.map_is_in_fov(fov_map, adj_x, adj_y) and
-                        angle < constant.FOV_ANGLE / 2):
+                if in_player_fov(adj_x, adj_y, player_x, player_y, mouse_x + camera_x,
+                                 mouse_y + camera_y, fov_map):
                     self.data[adj_y][adj_x].explored = True
 
                     tcod.console_put_char_ex(screen, x, y,
@@ -63,7 +43,6 @@ class Tile:
     def __init__(self, material, is_walkable, is_transparent):
         self.material = material
         self.char =  random.choice(tile_types.data[material][0])
-
         self.back_color = copy.deepcopy(tile_types.data[material][1])
         self.fore_color = copy.deepcopy(tile_types.data[material][1])
 
@@ -89,3 +68,29 @@ class Tile:
         self.is_transparent = is_transparent
 
         self.explored = False
+
+def in_player_fov(x, y, player_x, player_y, mouse_x, mouse_y, fov_map):
+    p = math.sqrt((x        - mouse_x)  ** 2 + (y        - mouse_y)  ** 2)
+    s = math.sqrt((player_x - mouse_x)  ** 2 + (player_y - mouse_y)  ** 2)
+    m = math.sqrt((x        - player_x) ** 2 + (y        - player_y) ** 2)
+
+    if p != 0 and s != 0 and m != 0:
+        try:
+            angle = math.acos(round((p ** 2 - s ** 2 - m ** 2) / (-2 * s * m), 10))
+        except Exception as ex:
+            print ex, str(p ** 2 - s ** 2 - m ** 2), str(-2 * s * m), a, str(-1 > a > 1), "p =", str(p), "s =", str(s), "m =", str(m)
+            return False
+    else:
+        angle = 0
+
+#               # S   <- (x, y)                cosine rule used to find P; angle between
+#               |\ m                           s and m. If this angle is > FOV_ANGLE / 2,
+#             p | # P <- (player_x, player_y)  the square s is out of vision
+#               |/ s
+#               # M   <- (mouse_x, mouse_y)
+
+    if (tcod.map_is_in_fov(fov_map, x, y) and
+            angle < constant.FOV_ANGLE / 2):
+        return True
+    else: 
+        return False

@@ -10,4 +10,4 @@ COLOR_VARIATION = 15
 
 MEMORY_TINT = 0.2
 
-FOV_ANGLE = radians(90)
+FOV_ANGLE = radians(120)
