@@ -17,6 +17,7 @@ def menu(items, header, x, y, width, height, target_console, background_console,
     """
 
     def draw_menu():
+        """Inner method called before and during blocking menu loop"""
         tcod.console_set_foreground_color(target_console, tcod.white)
         tcod.console_print_frame(target_console, 0, 0, width, height, False, tcod.BKGND_NONE, False) 
 
@@ -42,6 +43,7 @@ def menu(items, header, x, y, width, height, target_console, background_console,
 
     tcod.console_clear(target_console)
 
+    # Truncate each item to fit into the menu
     for item in items:
         if len(item) > width - 2:
             truncated_items.append(item[:width - len(TRUNCATE_SUFFIX) + 2] + constant.TRUNCATE_SUFFIX)

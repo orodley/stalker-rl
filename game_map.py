@@ -6,12 +6,22 @@ import tile_types
 import constant
 
 class Map:
+
+    """Represents the game map
+
+    data   -- Nested array of Tiles. self.data[y][x] gets a tile at any (x, y) position
+    height -- Height of map
+    width  -- Width of map
+    """
+
     def __init__(self, data):
         self.data = data
+        # Compute height and width for convenient access
         self.height = len(data)
         self.width = len(data[0])
 
     def render(self, screen, fov_map, camera_x, camera_y, player_x, player_y, mouse_x, mouse_y):
+        """Renders the map onto a given console, using line of sight from the player"""
         tcod.console_clear(screen)
 
         for y in xrange(constant.SCREEN_HEIGHT):
@@ -37,15 +47,32 @@ class Map:
                     tcod.console_set_back(screen, x, y, tcod.black)
 
 def make_map(width, height):
+    """Constructs a new Map"""
+
     return Map([[Tile("grass", True, True) for n in xrange(width)] for n in xrange(height)])
             
 class Tile:
-    def __init__(self, material, is_walkable, is_transparent):
+
+    """Represents a tile on a map
+    material            -- Type of tile. Used for lookup in tile_types
+    char                -- Character displayed on empty tile
+    is_transparent      -- Is the tile transparent?
+    is_walkable         -- Can the tile be walked onto?
+    fore_color          -- Color to draw char in. Retrieved from tile_types with variation applied
+    back_color          -- Background color of the tile. Retrieved from tile_types with variation applied
+    explored_fore_color -- Color to draw char in if previously seen but not currently visible. Darkened fore_color
+    explored_back_color -- Background color if previously seen but not currently visible. Darkened back_color
+    explored            -- Has the tile been seen before?
+    """
+
+    def __init__(self, material, is_transparent, is_walkable):
         self.material = material
         self.char =  random.choice(tile_types.data[material][0])
         self.back_color = copy.deepcopy(tile_types.data[material][1])
         self.fore_color = copy.deepcopy(tile_types.data[material][1])
 
+        # Random variation should be applied, but should not wrap around
+        # make sure that the maximum is <= 255 and the minimum is >= 0
         r_max = min(255, self.back_color.r + constant.COLOR_VARIATION)
         r_min = max(0, self.back_color.r - constant.COLOR_VARIATION)
         g_max = min(255, self.back_color.g + constant.COLOR_VARIATION)
@@ -61,6 +88,7 @@ class Tile:
         self.fore_color.g = random.randrange(g_min, g_max + 1)
         self.fore_color.b = random.randrange(b_min, b_max + 1)
 
+        # If the tile is explored it should be 
         self.explored_fore_color = self.fore_color * constant.MEMORY_TINT
         self.explored_back_color = self.back_color * constant.MEMORY_TINT
 
@@ -70,27 +98,23 @@ class Tile:
         self.explored = False
 
 def in_player_fov(x, y, player_x, player_y, mouse_x, mouse_y, fov_map):
+    #   # S   <- (x, y)                cosine rule used to find P; angle between
+    #   |\ m                           s and m. If this angle is > FOV_ANGLE / 2,
+    # p | # P <- (player_x, player_y)  the square s is out of vision
+    #   |/ s
+    #   # M   <- (mouse_x, mouse_y)
     p = math.sqrt((x        - mouse_x)  ** 2 + (y        - mouse_y)  ** 2)
     s = math.sqrt((player_x - mouse_x)  ** 2 + (player_y - mouse_y)  ** 2)
     m = math.sqrt((x        - player_x) ** 2 + (y        - player_y) ** 2)
 
     if p != 0 and s != 0 and m != 0:
-        try:
-            angle = math.acos(round((p ** 2 - s ** 2 - m ** 2) / (-2 * s * m), 10))
-        except Exception as ex:
-            print ex, str(p ** 2 - s ** 2 - m ** 2), str(-2 * s * m), a, str(-1 > a > 1), "p =", str(p), "s =", str(s), "m =", str(m)
-            return False
+        # Rearranged cosine rule formula
+        angle = math.acos(round((p ** 2 - s ** 2 - m ** 2) / (-2 * s * m), 10))
     else:
         angle = 0
 
-#               # S   <- (x, y)                cosine rule used to find P; angle between
-#               |\ m                           s and m. If this angle is > FOV_ANGLE / 2,
-#             p | # P <- (player_x, player_y)  the square s is out of vision
-#               |/ s
-#               # M   <- (mouse_x, mouse_y)
-
     if (tcod.map_is_in_fov(fov_map, x, y) and
-            angle < constant.FOV_ANGLE / 2):
+        angle < constant.FOV_ANGLE / 2):
         return True
     else: 
         return False
