@@ -49,7 +49,7 @@ class Map:
 def make_map(width, height):
     """Constructs a new Map"""
 
-    return Map([[Tile("grass", True, True) for n in xrange(width)] for n in xrange(height)])
+    return Map([[Tile("grass", True, True) for x in xrange(width)] for y in xrange(height)])
             
 class Tile:
 
@@ -88,7 +88,7 @@ class Tile:
         self.fore_color.g = random.randrange(g_min, g_max + 1)
         self.fore_color.b = random.randrange(b_min, b_max + 1)
 
-        # If the tile is explored it should be 
+        # If the tile is explored it should be darker
         self.explored_fore_color = self.fore_color * constant.MEMORY_TINT
         self.explored_back_color = self.back_color * constant.MEMORY_TINT
 

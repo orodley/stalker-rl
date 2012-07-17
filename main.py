@@ -1,20 +1,16 @@
 #!/usr/bin/env python
 
 import os
-import random
-import math
-import cProfile
 import libtcodpy as tcod
-
 import game_map
 import ui
 import entity
 import constant
 
-MAIN_MENU_X = 5 # Co-ordinates to draw main menu at
-MAIN_MENU_Y = 5
 MAIN_MENU_WIDTH = 30  # Size of main menu
 MAIN_MENU_HEIGHT = 10 
+MAIN_MENU_X = (constant.SCREEN_WIDTH / 2)  - (MAIN_MENU_WIDTH / 2) # Co-ordinates to draw main menu at
+MAIN_MENU_Y = (constant.SCREEN_HEIGHT / 2) - (MAIN_MENU_HEIGHT / 2)
 
 VISION_RANGE = 40 # How far the player can see
 
@@ -70,20 +66,6 @@ def update_entity_fov(entity_list, a_map, fov_map):
                                 _entity.is_walkable and a_map.data[_entity.y][_entity.x].is_walkable)
     return fov_map
 
-def check_collision(x, y, a_map, entity_list):
-    """Check if a given (x, y) position collides with a tile or entity"""
-    if x >= a_map.width or y >= a_map.height: # Outside map, collide
-        return True
-
-    if not a_map.data[y][x].is_walkable:
-        return True
-
-    for _entity in entity_list:
-        if _entity.x == x and _entity.y == y:
-            return True
-
-    return False
-
 def play_arena():
     the_map = game_map.make_map(constant.SCREEN_WIDTH + 10, constant.SCREEN_HEIGHT + 10)
     fov_map = tcod.map_new(constant.SCREEN_WIDTH + 10, constant.SCREEN_HEIGHT + 10)
@@ -123,26 +105,26 @@ def play_arena():
 
         key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
         if key.vk == tcod.KEY_LEFT:
-            if not check_collision(player.x - 1, player.y, the_map, entity_list):
+            if not entity.check_collision(player.x - 1, player.y, the_map, entity_list):
                 player.x -= 0 if player.x == 0 else 1
                 fov_recompute = True
         elif key.vk == tcod.KEY_RIGHT:
-            if not check_collision(player.x + 1, player.y, the_map, entity_list):
+            if not entity.check_collision(player.x + 1, player.y, the_map, entity_list):
                 player.x += 0 if player.x == the_map.width else 1
                 fov_recompute = True
         elif key.vk == tcod.KEY_UP:
-            if not check_collision(player.x, player.y - 1, the_map, entity_list):
+            if not entity.check_collision(player.x, player.y - 1, the_map, entity_list):
                 player.y -= 0 if player.y == 0 else 1
                 fov_recompute = True
         elif key.vk == tcod.KEY_DOWN:
-            if not check_collision(player.x, player.y + 1, the_map, entity_list):
+            if not entity.check_collision(player.x, player.y + 1, the_map, entity_list):
                 player.y += 0 if player.y == the_map.height else 1
                 fov_recompute = True
         elif key.vk == tcod.KEY_ESCAPE:
             break
 
 while not tcod.console_is_window_closed():
-    option = ui.menu(['New Game', 'Load Game', 'Highscores', 'Credits', 'Exit'], "S.T.A.L.K.E.R. RL",
+    option = ui.menu(['New Game', 'Load Game', 'Highscores', 'Exit'], "S.T.A.L.K.E.R. RL",
                      MAIN_MENU_X, MAIN_MENU_Y, MAIN_MENU_WIDTH, MAIN_MENU_HEIGHT, ui_con, game_con, 0.7)
     if option == 0:
         while True:
@@ -158,6 +140,4 @@ while not tcod.console_is_window_closed():
     elif option == 2:
         pass
     elif option == 3:
-        pass
-    elif option == 4:
         break
