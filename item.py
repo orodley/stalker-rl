@@ -242,16 +242,16 @@ class Magazine:
     """A magazine. Can have ammo loaded into it, and be loaded into a gun
 
     owner             -- Reference to owning Item
-    capacity          -- Maximum number of loaded rounds
     supported_rounds  -- Round types that can be loaded into magazine
+    capacity          -- Maximum number of loaded rounds
     loaded_round_type -- Name of the type of round loaded into magazine
     loaded_rounds     -- Current number of rounds loaded into magazine
     """
 
-    def __init__(self, owner, capacity, supported_rounds, loaded_round_type="", loaded_rounds=0):
+    def __init__(self, owner, supported_rounds, capacity, loaded_round_type="", loaded_rounds=0):
         self.owner = owner
-        self.capacity = capacity
         self.supported_rounds = supported_rounds
+        self.capacity = capacity
         self.loaded_round_type = loaded_round_type
         self.loaded_rounds = loaded_rounds
 
