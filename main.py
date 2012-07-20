@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import math
 import libtcodpy as tcod
 import game_map
 import ui
@@ -30,7 +31,10 @@ tcod.console_set_keyboard_repeat(10, 50)
 tcod.console_credits()
 
 img = tcod.image_load(os.path.join('images', 'menu_background.png'))
+#img2 = tcod.image_load(os.path.join('images', 'test.png'))
+#tcod.image_set_key_color(img2, tcod.pink)
 tcod.image_blit_2x(img, game_con, 0, 0)
+#tcod.image_blit(img2, game_con, 10, 10, tcod.BKGND_SET, 1, 1, 0)
 tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
 tcod.console_flush()
 
@@ -50,6 +54,19 @@ def update_camera(follow_x, follow_y, map_width, map_height):
 
     return (camera_x, camera_y)
 
+def get_point_ahead(player_x, player_y, mouse_x, mouse_y, distance):
+    """Returns the co-ordinates of a point "distance" ahead of the player"""
+    if player_x == mouse_x and player_y == mouse_y:
+        return (player_x, player_y) # Avoid division by zero
+
+    # What proportion of the player-mouse distance the target point is at
+    proportion = distance / math.sqrt((player_x - mouse_x) ** 2 + (player_y - mouse_y) ** 2)
+
+    point_x = int(round(player_x - (proportion * (player_x - mouse_x))))
+    point_y = int(round(player_y - (proportion * (player_y - mouse_y))))
+
+    return (point_x, point_y)
+
 def update_fov(a_map, fov_map):
     """Updates the fov map with all map information in a_map"""
     for y in xrange(a_map.height):
@@ -67,13 +84,14 @@ def update_entity_fov(entity_list, a_map, fov_map):
     return fov_map
 
 def play_arena():
-    the_map = game_map.make_map(constant.SCREEN_WIDTH + 10, constant.SCREEN_HEIGHT + 10)
-    fov_map = tcod.map_new(constant.SCREEN_WIDTH + 10, constant.SCREEN_HEIGHT + 10)
-    player = entity.Entity(0, 0, "@", tcod.black)
+    map_size = (constant.SCREEN_WIDTH * 4, constant.SCREEN_HEIGHT * 4)
+    the_map = game_map.make_map(*map_size)
+    fov_map = tcod.map_new(*map_size)
+    player = entity.Entity(map_size[0] / 2, map_size[1] / 2, "@", tcod.black)
 
     entity_list = [player]
 
-    camera_x, camera_y = (1, 1)
+    camera_x, camera_y = (player.x, player.y)
 
     fov_map = update_fov(the_map, fov_map)
     tcod.map_compute_fov(fov_map, player.x, player.y, VISION_RANGE, True, tcod.FOV_BASIC)
@@ -85,9 +103,13 @@ def play_arena():
     mouse_status = tcod.mouse_get_status()
     
     while True:
-        # Update camera and FOV
-        (camera_x, camera_y) = update_camera(player.x, player.y,
-                                             the_map.width, the_map.height)
+        if not in_menu:
+            # Update camera. This must be done before rendering
+            (center_x, center_y) = get_point_ahead(player.x, player.y, mouse_status.cx + camera_x,
+                                                   mouse_status.cy + camera_y, constant.CAMERA_DISTANCE)
+            (camera_x, camera_y) = update_camera(center_x, center_y, the_map.width, the_map.height)
+
+        # Update FOV
         if fov_recompute:
             tcod.map_compute_fov(fov_map, player.x, player.y, VISION_RANGE, True, tcod.FOV_BASIC)
         update_entity_fov(entity_list, the_map, fov_map)
@@ -115,6 +137,7 @@ def play_arena():
         key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
 
         if not in_menu:
+
             if key.vk == tcod.KEY_LEFT: # Move left
                 if not entity.check_collision(player.x - 1, player.y, the_map, entity_list):
                     player.x -= 0 if player.x == 0 else 1
@@ -139,7 +162,7 @@ def play_arena():
             if key.vk == tcod.KEY_ESCAPE:
                 in_menu = False
             elif key.vk == tcod.KEY_UP:
-                menu_index += selected_index and -1
+                menu_index += menu_index and -1
             elif key.vk == tcod.KEY_DOWN:
                 menu_index += 0 if menu_index == len(truncated_items) - 1 else 1
             elif key.vk == tcod.KEY_ENTER:
@@ -149,6 +172,7 @@ def play_arena():
 main_menu_index = 0
 while not tcod.console_is_window_closed():
     tcod.image_blit_2x(img, game_con, 0, 0)
+    #tcod.image_blit(img2, game_con, 10, 10, tcod.BKGND_SET, 1, 1, 0)
     tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
     tcod.console_clear(ui_con)
     ui.draw_menu(ui_con, "S.T.A.L.K.E.R. RL", ['New Game', 'Load Game', 'Highscores', 'Exit'],

@@ -1,3 +1,4 @@
+import sys
 import copy
 import math
 import random
@@ -50,6 +51,16 @@ def make_map(width, height):
     """Constructs a new Map"""
 
     return Map([[Tile("grass", True, True) for x in xrange(width)] for y in xrange(height)])
+
+def copy_color(color):
+    """Copies a tcod.Color object and returns the copy"""
+    # Assigning directly creates references, not copies, but copy.deepcopy
+    # is far too slow. This function is much faster
+    r = color.r
+    g = color.g
+    b = color.b
+
+    return tcod.Color(r, g, b)
             
 class Tile:
 
@@ -68,8 +79,8 @@ class Tile:
     def __init__(self, material, is_transparent, is_walkable):
         self.material = material
         self.char =  random.choice(tile_types.data[material][0])
-        self.back_color = copy.deepcopy(tile_types.data[material][1])
-        self.fore_color = copy.deepcopy(tile_types.data[material][1])
+        self.back_color = copy_color(tile_types.data[material][1])
+        self.fore_color = copy_color(tile_types.data[material][1])
 
         # Random variation should be applied, but should not wrap around
         # make sure that the maximum is <= 255 and the minimum is >= 0
@@ -113,8 +124,12 @@ def in_player_fov(x, y, player_x, player_y, mouse_x, mouse_y, fov_map):
     else:
         angle = 0
 
-    if (tcod.map_is_in_fov(fov_map, x, y) and
-        angle < constant.FOV_ANGLE / 2):
-        return True
+    try:
+        if (tcod.map_is_in_fov(fov_map, x, y) and
+            angle < constant.FOV_ANGLE / 2):
+            return True
+    except:
+        print x, y
+        sys.exit(1)
     else: 
         return False
