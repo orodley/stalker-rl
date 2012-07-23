@@ -128,6 +128,14 @@ def play_arena():
         
         # Finally, blit the console and flush
         tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
+
+        if in_menu == "inventory":
+            tcod.console_clear(ui_con)
+            ui.draw_checkerboard(ui_con, constant.INENTORY_SIZE[0], constant.INENTORY_SIZE[1],
+                                 constant.SQUARE_SIZE, tcod.black, tcod.white)
+            tcod.console_blit(ui_con, 0, 0, constant.INENTORY_SIZE[0] * constant.SQUARE_SIZE,
+                                            constant.INENTORY_SIZE[1] * constant.SQUARE_SIZE, 0, 0, 0)
+
         tcod.console_flush()
 
         fov_recompute = False
@@ -154,20 +162,13 @@ def play_arena():
                 if not entity.check_collision(player.x, player.y + 1, the_map, entity_list):
                     player.y += 0 if player.y == the_map.height else 1
                     fov_recompute = True
-            elif key.c == "i":
+            elif key.c == ord("i"):
                 in_menu = "inventory"
             elif key.vk == tcod.KEY_ESCAPE: # Quit back to main menu
                 break
         elif in_menu == "inventory":
-            if key.vk == tcod.KEY_ESCAPE:
-                in_menu = False
-            elif key.vk == tcod.KEY_UP:
-                menu_index += menu_index and -1
-            elif key.vk == tcod.KEY_DOWN:
-                menu_index += 0 if menu_index == len(truncated_items) - 1 else 1
-            elif key.vk == tcod.KEY_ENTER:
-                return menu_index
-
+            if key.c == ord("i"):
+                in_menu = ""
 
 main_menu_index = 0
 while not tcod.console_is_window_closed():
@@ -176,7 +177,8 @@ while not tcod.console_is_window_closed():
     tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
     tcod.console_clear(ui_con)
     ui.draw_menu(ui_con, "S.T.A.L.K.E.R. RL", ['New Game', 'Load Game', 'Highscores', 'Exit'],
-                     MAIN_MENU_X, MAIN_MENU_Y, MAIN_MENU_WIDTH, MAIN_MENU_HEIGHT, 0.7, main_menu_index)
+                 MAIN_MENU_WIDTH, MAIN_MENU_HEIGHT, main_menu_index)
+    tcod.console_blit(ui_con, 0, 0, MAIN_MENU_WIDTH, MAIN_MENU_HEIGHT, 0, MAIN_MENU_X, MAIN_MENU_Y, 1.0, 0.7)
     tcod.console_flush()
 
     option = ui.handle_menu_input(tcod.console_wait_for_keypress(True), main_menu_index, 4)
@@ -188,8 +190,8 @@ while not tcod.console_is_window_closed():
                 tcod.image_blit_2x(img, game_con, 0, 0)
                 tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
                 tcod.console_clear(ui_con)
-                ui.draw_menu(ui_con, "Game mode?", ['Arena'], MAIN_MENU_X, MAIN_MENU_Y,
-                            MAIN_MENU_WIDTH, MAIN_MENU_HEIGHT, 0.7, gamemode_menu_index)
+                ui.draw_menu(ui_con, "Select game mode", ['Arena'], MAIN_MENU_WIDTH, MAIN_MENU_HEIGHT, main_menu_index)
+                tcod.console_blit(ui_con, 0, 0, MAIN_MENU_WIDTH, MAIN_MENU_HEIGHT, 0, MAIN_MENU_X, MAIN_MENU_Y, 1.0, 0.7)
                 tcod.console_flush()
 
                 option = ui.handle_menu_input(tcod.console_wait_for_keypress(True), gamemode_menu_index, 1)

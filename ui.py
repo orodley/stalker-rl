@@ -1,8 +1,10 @@
 import libtcodpy as tcod
 import constant
 
-def draw_menu(console, header, items, x, y, width, height, alpha, selected_index):
-    """Draws a menu and returns. Used in non-blocking menu loops"""
+def draw_menu(console, header, items, width, height, selected_index):
+    """Draws a menu and returns. Used in non-blocking menu loops
+    Usually drawn to a temporary console and then blitted to wherever you need it
+    """
 
     truncated_items = []
 
@@ -28,7 +30,27 @@ def draw_menu(console, header, items, x, y, width, height, alpha, selected_index
         tcod.console_print_left(console, 1, pos + 1,
                                 tcod.BKGND_NONE, truncated_items[pos])
 
-    tcod.console_blit(console, 0, 0, width, height, 0, x, y, 1.0, alpha)
+def draw_rectangle(console, color, x, y, width, height=None, flags=tcod.BKGND_SET):
+    """Draw a rectangle on target console. If height no provided, draw a square by default"""
+
+    if height is None:
+        height = width
+
+    for _x in xrange(x, x + width):
+        for _y in xrange(y, y + width):
+            tcod.console_set_back(console, _x, _y, color, flags)
+
+def draw_checkerboard(console, width, height, square_size, color1, color2):
+    """Draws a checkerboard pattern on the specified console.
+    Width and height are measured in squares in checkerboard, not cells
+    """
+
+    for y in xrange(0, height * square_size, square_size):
+        for x in xrange(0, width * square_size, square_size):
+            if x % 2 == y % 2:
+                draw_rectangle(console, color1, x, y, square_size)
+            else:
+                draw_rectangle(console, color2, x, y, square_size)
 
 def handle_menu_input(key, index, num_options):
     """Handles input while in menus. Returns "ENTER" if enter pushed, "ESCAPE" if escape
