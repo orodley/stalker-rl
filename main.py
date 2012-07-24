@@ -18,8 +18,8 @@ INVENTORY_Y = 2
 
 VISION_RANGE = 40 # How far the player can see
 
-tcod.console_set_custom_font(os.path.join('fonts', 'terminal10x10.png'),
-                             tcod.FONT_TYPE_GREYSCALE | tcod.FONT_LAYOUT_TCOD)
+tcod.console_set_custom_font(os.path.join('fonts', 'terminal8x8_aa_ro.png'),
+                             tcod.FONT_LAYOUT_ASCII_INROW)
 
 tcod.console_init_root(constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 'S.T.A.L.K.E.R RL', False)
 
@@ -143,6 +143,11 @@ def play_arena():
             tcod.console_clear(ui_con)
             ui.draw_checkerboard(ui_con, constant.INENTORY_SIZE[0], constant.INENTORY_SIZE[1],
                                  constant.SQUARE_SIZE, tcod.grey, tcod.dark_grey)
+
+            if selected_inv_square is not None:
+                tcod.console_print_frame(ui_con, selected_inv_square[0] * constant.SQUARE_SIZE,
+                                                 selected_inv_square[1] * constant.SQUARE_SIZE,
+                                                 constant.SQUARE_SIZE, constant.SQUARE_SIZE, False, tcod.BKGND_NONE, False)
             tcod.console_blit(ui_con, 0, 0, constant.INENTORY_SIZE[0] * constant.SQUARE_SIZE,
                               constant.INENTORY_SIZE[1] * constant.SQUARE_SIZE, 0, INVENTORY_X, INVENTORY_Y)
 
@@ -180,7 +185,7 @@ def play_arena():
                 if selected_inv_square == prev_square:
                     selected_inv_square = None
                 elif not ((0 <= selected_inv_square[0] < constant.INENTORY_SIZE[0]) and
-                             (0 <= selected_inv_square[1] < constant.INENTORY_SIZE[1])):
+                          (0 <= selected_inv_square[1] < constant.INENTORY_SIZE[1])):
                     selected_inv_square = prev_square
                 print (mouse_status.cx, mouse_status.cy), selected_inv_square
             elif key.c == ord("i"):

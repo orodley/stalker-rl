@@ -1,7 +1,7 @@
 from math import radians
 
-SCREEN_WIDTH = 80        # Width  of window in tiles
-SCREEN_HEIGHT = 54       # Height of window in tiles
+SCREEN_WIDTH = 120       # Width  of window in tiles
+SCREEN_HEIGHT = 79       # Height of window in tiles
 LIMIT_FPS = 30           # FPS cap
 
 TRUNCATE_SUFFIX = "..."  # If a word cannot fit into a menu, it is truncated and this is appended
@@ -17,4 +17,4 @@ MAX_CONDITION = 10000    # Perfect condition for a weapon
 CAMERA_DISTANCE = 0      # How far ahead of the player to center the camera
 
 INENTORY_SIZE = (6, 5)   # Size of the inventory grid for the player in squares
-SQUARE_SIZE = 10         # How large each square in the grid is
+SQUARE_SIZE = 15         # How large each square in the grid is
