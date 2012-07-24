@@ -13,6 +13,9 @@ MAIN_MENU_HEIGHT = 10
 MAIN_MENU_X = (constant.SCREEN_WIDTH / 2)  - (MAIN_MENU_WIDTH / 2) # Co-ordinates to draw main menu at
 MAIN_MENU_Y = (constant.SCREEN_HEIGHT / 2) - (MAIN_MENU_HEIGHT / 2)
 
+INVENTORY_X = 2 # Position to draw inventory menu at
+INVENTORY_Y = 2
+
 VISION_RANGE = 40 # How far the player can see
 
 tcod.console_set_custom_font(os.path.join('fonts', 'terminal10x10.png'),
@@ -99,15 +102,21 @@ def play_arena():
 
     in_menu = False
     menu_index = 0
+    selected_inv_square = None
 
     mouse_status = tcod.mouse_get_status()
     
     while True:
+        # Get input
+        key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
+        mouse_status = tcod.mouse_get_status()
+
         if not in_menu:
             # Update camera. This must be done before rendering
             (center_x, center_y) = get_point_ahead(player.x, player.y, mouse_status.cx + camera_x,
                                                    mouse_status.cy + camera_y, constant.CAMERA_DISTANCE)
             (camera_x, camera_y) = update_camera(center_x, center_y, the_map.width, the_map.height)
+            player_facing_point = (mouse_status.cx, mouse_status.cy)
 
         # Update FOV
         if fov_recompute:
@@ -115,7 +124,7 @@ def play_arena():
         update_entity_fov(entity_list, the_map, fov_map)
 
         # Render the map and entities
-        the_map.render(game_con, fov_map, camera_x, camera_y, player.x, player.y, mouse_status.cx, mouse_status.cy)
+        the_map.render(game_con, fov_map, camera_x, camera_y, player.x, player.y, *player_facing_point)
         
         # Only entities in the player's line of sight should be drawn
         for _entity in entity_list:
@@ -129,23 +138,20 @@ def play_arena():
         # Finally, blit the console and flush
         tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
 
+        # If in inventory, draw inventory grid
         if in_menu == "inventory":
             tcod.console_clear(ui_con)
             ui.draw_checkerboard(ui_con, constant.INENTORY_SIZE[0], constant.INENTORY_SIZE[1],
-                                 constant.SQUARE_SIZE, tcod.black, tcod.white)
+                                 constant.SQUARE_SIZE, tcod.grey, tcod.dark_grey)
             tcod.console_blit(ui_con, 0, 0, constant.INENTORY_SIZE[0] * constant.SQUARE_SIZE,
-                                            constant.INENTORY_SIZE[1] * constant.SQUARE_SIZE, 0, 0, 0)
+                              constant.INENTORY_SIZE[1] * constant.SQUARE_SIZE, 0, INVENTORY_X, INVENTORY_Y)
 
         tcod.console_flush()
 
         fov_recompute = False
 
-        mouse_status = tcod.mouse_get_status()
-
-        key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
-
+        # Handle input
         if not in_menu:
-
             if key.vk == tcod.KEY_LEFT: # Move left
                 if not entity.check_collision(player.x - 1, player.y, the_map, entity_list):
                     player.x -= 0 if player.x == 0 else 1
@@ -167,7 +173,17 @@ def play_arena():
             elif key.vk == tcod.KEY_ESCAPE: # Quit back to main menu
                 break
         elif in_menu == "inventory":
-            if key.c == ord("i"):
+            if mouse_status.lbutton_pressed:
+                prev_square = selected_inv_square
+                selected_inv_square = ((mouse_status.cx - INVENTORY_X) / constant.SQUARE_SIZE,
+                                       (mouse_status.cy - INVENTORY_Y) / constant.SQUARE_SIZE)
+                if selected_inv_square == prev_square:
+                    selected_inv_square = None
+                elif not ((0 <= selected_inv_square[0] < constant.INENTORY_SIZE[0]) and
+                             (0 <= selected_inv_square[1] < constant.INENTORY_SIZE[1])):
+                    selected_inv_square = prev_square
+                print (mouse_status.cx, mouse_status.cy), selected_inv_square
+            elif key.c == ord("i"):
                 in_menu = ""
 
 main_menu_index = 0

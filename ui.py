@@ -35,9 +35,8 @@ def draw_rectangle(console, color, x, y, width, height=None, flags=tcod.BKGND_SE
 
     if height is None:
         height = width
-
-    for _x in xrange(x, x + width):
-        for _y in xrange(y, y + width):
+    for _y in xrange(y, y + height):
+        for _x in xrange(x, x + width):
             tcod.console_set_back(console, _x, _y, color, flags)
 
 def draw_checkerboard(console, width, height, square_size, color1, color2):
@@ -47,7 +46,7 @@ def draw_checkerboard(console, width, height, square_size, color1, color2):
 
     for y in xrange(0, height * square_size, square_size):
         for x in xrange(0, width * square_size, square_size):
-            if x % 2 == y % 2:
+            if x / square_size % 2 == y / square_size % 2:
                 draw_rectangle(console, color1, x, y, square_size)
             else:
                 draw_rectangle(console, color2, x, y, square_size)
