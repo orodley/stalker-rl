@@ -104,6 +104,9 @@ def play_arena():
     menu_index = 0
     selected_inv_square = None
 
+    test = tcod.image_load(os.path.join("images", "weapons", "Makarov PM.png"))
+    tcod.image_set_key_color(test, tcod.pink)
+
     mouse_status = tcod.mouse_get_status()
     
     while True:
@@ -135,7 +138,7 @@ def play_arena():
         # fps display
         tcod.console_print_right(game_con, constant.SCREEN_WIDTH - 1, 0, tcod.BKGND_NONE, str(tcod.sys_get_fps()))
         
-        # Finally, blit the console and flush
+        # Finally, blit the console
         tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
 
         # If in inventory, draw inventory grid
@@ -143,7 +146,7 @@ def play_arena():
             tcod.console_clear(ui_con)
             ui.draw_checkerboard(ui_con, constant.INENTORY_SIZE[0], constant.INENTORY_SIZE[1],
                                  constant.SQUARE_SIZE, tcod.grey, tcod.dark_grey)
-
+            tcod.image_blit_2x(test, ui_con, 0, 0, 0, 0, -1, -1)
             if selected_inv_square is not None:
                 tcod.console_print_frame(ui_con, selected_inv_square[0] * constant.SQUARE_SIZE,
                                                  selected_inv_square[1] * constant.SQUARE_SIZE,
@@ -152,7 +155,6 @@ def play_arena():
                               constant.INENTORY_SIZE[1] * constant.SQUARE_SIZE, 0, INVENTORY_X, INVENTORY_Y)
 
         tcod.console_flush()
-
         fov_recompute = False
 
         # Handle input
