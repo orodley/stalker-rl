@@ -1,10 +1,8 @@
-import sys
-import copy
-import math
 import random
 import libtcodpy as tcod
 import tile_types
 import constant
+import fov
 
 class Map:
 
@@ -31,8 +29,8 @@ class Map:
             for x in xrange(constant.SCREEN_WIDTH):
                 adj_x = x + camera_x
 
-                if in_player_fov(adj_x, adj_y, player_x, player_y, mouse_x + camera_x,
-                                 mouse_y + camera_y, fov_map):
+                if fov.in_player_fov(adj_x, adj_y, player_x, player_y, mouse_x + camera_x,
+                                     mouse_y + camera_y, fov_map):
                     self.data[adj_y][adj_x].explored = True
 
                     tcod.console_put_char_ex(screen, x, y,
@@ -107,29 +105,3 @@ class Tile:
         self.is_transparent = is_transparent
 
         self.explored = False
-
-def in_player_fov(x, y, player_x, player_y, mouse_x, mouse_y, fov_map):
-    #   # S   <- (x, y)                cosine rule used to find P; angle between
-    #   |\ m                           s and m. If this angle is > FOV_ANGLE / 2,
-    # p | # P <- (player_x, player_y)  the square s is out of vision
-    #   |/ s
-    #   # M   <- (mouse_x, mouse_y)
-    p = math.sqrt((x        - mouse_x)  ** 2 + (y        - mouse_y)  ** 2)
-    s = math.sqrt((player_x - mouse_x)  ** 2 + (player_y - mouse_y)  ** 2)
-    m = math.sqrt((x        - player_x) ** 2 + (y        - player_y) ** 2)
-
-    if p != 0 and s != 0 and m != 0:
-        # Rearranged cosine rule formula
-        angle = math.acos(round((p ** 2 - s ** 2 - m ** 2) / (-2 * s * m), 10))
-    else:
-        angle = 0
-
-    try:
-        if (tcod.map_is_in_fov(fov_map, x, y) and
-            angle < constant.FOV_ANGLE / 2):
-            return True
-    except:
-        print x, y
-        sys.exit(1)
-    else: 
-        return False

@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 import os
-import math
 import libtcodpy as tcod
 import game_map
 import ui
 import entity
 import constant
+import geometry
+import fov
 
 MAIN_MENU_WIDTH = 30  # Size of main menu
 MAIN_MENU_HEIGHT = 10 
@@ -41,51 +42,6 @@ tcod.image_blit_2x(img, game_con, 0, 0)
 tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
 tcod.console_flush()
 
-def update_camera(follow_x, follow_y, map_width, map_height):
-    """Returns (camera_x, camera_y) centered on (follow_x, follow_y)"""
-    camera_x = follow_x - constant.SCREEN_WIDTH / 2
-    if camera_x < 0:
-        camera_x = 0
-    elif camera_x > map_width - constant.SCREEN_WIDTH:
-        camera_x = map_width - constant.SCREEN_WIDTH
-
-    camera_y = follow_y - constant.SCREEN_HEIGHT / 2
-    if camera_y < 0:
-        camera_y = 0
-    elif camera_y > map_height - constant.SCREEN_HEIGHT:
-        camera_y = map_height - constant.SCREEN_HEIGHT
-
-    return (camera_x, camera_y)
-
-def get_point_ahead(player_x, player_y, mouse_x, mouse_y, distance):
-    """Returns the co-ordinates of a point "distance" ahead of the player"""
-    if player_x == mouse_x and player_y == mouse_y:
-        return (player_x, player_y) # Avoid division by zero
-
-    # What proportion of the player-mouse distance the target point is at
-    proportion = distance / math.sqrt((player_x - mouse_x) ** 2 + (player_y - mouse_y) ** 2)
-
-    point_x = int(round(player_x - (proportion * (player_x - mouse_x))))
-    point_y = int(round(player_y - (proportion * (player_y - mouse_y))))
-
-    return (point_x, point_y)
-
-def update_fov(a_map, fov_map):
-    """Updates the fov map with all map information in a_map"""
-    for y in xrange(a_map.height):
-        for x in xrange(a_map.width):
-            tcod.map_set_properties(fov_map, x, y, a_map.data[y][x].is_transparent,
-                                                   a_map.data[y][x].is_walkable)
-    return fov_map
-
-def update_entity_fov(entity_list, a_map, fov_map):
-    """Update fov_map for all entities in entity_list"""
-    for _entity in entity_list:
-        tcod.map_set_properties(fov_map, _entity.x, _entity.y,
-                                _entity.is_transparent and a_map.data[_entity.y][_entity.x].is_transparent,
-                                _entity.is_walkable and a_map.data[_entity.y][_entity.x].is_walkable)
-    return fov_map
-
 def play_arena():
     map_size = (constant.SCREEN_WIDTH * 4, constant.SCREEN_HEIGHT * 4)
     the_map = game_map.make_map(*map_size)
@@ -96,7 +52,7 @@ def play_arena():
 
     camera_x, camera_y = (player.x, player.y)
 
-    fov_map = update_fov(the_map, fov_map)
+    fov_map = fov.update_fov_map(the_map, fov_map)
     tcod.map_compute_fov(fov_map, player.x, player.y, VISION_RANGE, True, tcod.FOV_BASIC)
     fov_recompute = True
 
@@ -116,23 +72,23 @@ def play_arena():
 
         if not in_menu:
             # Update camera. This must be done before rendering
-            (center_x, center_y) = get_point_ahead(player.x, player.y, mouse_status.cx + camera_x,
+            (center_x, center_y) = geometry.get_point_ahead(player.x, player.y, mouse_status.cx + camera_x,
                                                    mouse_status.cy + camera_y, constant.CAMERA_DISTANCE)
-            (camera_x, camera_y) = update_camera(center_x, center_y, the_map.width, the_map.height)
+            (camera_x, camera_y) = geometry.update_camera(center_x, center_y, the_map.width, the_map.height)
             player_facing_point = (mouse_status.cx, mouse_status.cy)
 
         # Update FOV
         if fov_recompute:
             tcod.map_compute_fov(fov_map, player.x, player.y, VISION_RANGE, True, tcod.FOV_BASIC)
-        update_entity_fov(entity_list, the_map, fov_map)
+        fov.update_entity_fov(entity_list, the_map, fov_map)
 
         # Render the map and entities
         the_map.render(game_con, fov_map, camera_x, camera_y, player.x, player.y, *player_facing_point)
         
         # Only entities in the player's line of sight should be drawn
         for _entity in entity_list:
-            if game_map.in_player_fov(_entity.x, _entity.y, player.x, player.y, mouse_status.cx + camera_x,
-                                      mouse_status.cy + camera_y, fov_map):
+            if fov.in_player_fov(_entity.x, _entity.y, player.x, player.y, mouse_status.cx + camera_x,
+                                 mouse_status.cy + camera_y, fov_map):
                 _entity.render(game_con, camera_x, camera_y)
 
         # fps display
