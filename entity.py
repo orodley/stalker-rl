@@ -5,16 +5,17 @@ class Entity:
 
     """Represents a dynamic entity in the map
 
-    x, y           -- Cartesian coordinates on the map
-    char           -- Character used to display the entity on the screen
-    fore_color     -- Color the character is displayed in
-    is_transparent -- Is entity tile transparent?
-    is_walkable    -- Can the entity be walked onto?
-    item_component -- If the entity is a dropped item, this stores item information
+    x, y                -- Cartesian coordinates on the map
+    char                -- Character used to display the entity on the screen
+    fore_color          -- Color the character is displayed in
+    is_transparent      -- Is entity tile transparent?
+    is_walkable         -- Can the entity be walked onto?
+    item_component      -- If the entity is a dropped item, this stores item information
+    inventory_component -- If the entity has an inventory, its inventory
     """
 
     def __init__(self, x, y, char, fore_color, is_transparent=True, is_walkable=True,
-                    item_component=None):
+                    item_component=None, inventory_component=None):
         self.x = x
         self.y = y
         self.char = char
@@ -22,8 +23,8 @@ class Entity:
         self.is_transparent = is_transparent
         self.is_walkable = is_walkable
 
-        if item_component:
-            self.item_component = item_component
+        self.item_component = item_component
+        self.inventory_component = inventory_component
 
     def move(self, dx, dy):
         """Move entity by (dx, dy)"""
@@ -46,7 +47,7 @@ def check_collision(x, y, a_map, entity_list):
         return True
 
     for _entity in entity_list:
-        if _entity.x == x and _entity.y == y:
+        if _entity.x == x and _entity.y == y and not _entity.is_walkable:
             return True
 
     return False

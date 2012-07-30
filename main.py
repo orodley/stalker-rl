@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import cProfile
 import libtcodpy as tcod
 import game_map
 import ui
@@ -8,6 +9,8 @@ import entity
 import constant
 import geometry
 import fov
+import item
+import item_types
 
 MAIN_MENU_WIDTH = 30  # Size of main menu
 MAIN_MENU_HEIGHT = 10 
@@ -43,12 +46,23 @@ tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT,
 tcod.console_flush()
 
 def play_arena():
-    map_size = (constant.SCREEN_WIDTH * 4, constant.SCREEN_HEIGHT * 4)
+    map_size = (constant.SCREEN_WIDTH * 1, constant.SCREEN_HEIGHT * 1)
     the_map = game_map.make_map(*map_size)
     fov_map = tcod.map_new(*map_size)
-    player = entity.Entity(map_size[0] / 2, map_size[1] / 2, "@", tcod.black)
 
-    entity_list = [player]
+    player = entity.Entity(map_size[0] / 2, map_size[1] / 2, "@", tcod.black)
+    player.inventory_component = item.Inventory(player, constant.INENTORY_SIZE[0],
+                                constant.INENTORY_SIZE[1], constant.WEIGHT_LIMIT)
+
+
+    blah = "Makarov PM"
+    test_makarov = item.Item(blah, item_types.firearms[blah][-1])
+    test_makarov.gun_component = item.Gun(test_makarov, *item_types.firearms[blah][:-1])
+    makarov_entity = entity.Entity(map_size[0] / 2 + 1, map_size[1] / 2 + 1, "]",
+                                   tcod.dark_grey, item_component=test_makarov,
+                                   is_walkable=True)
+
+    entity_list = [player, makarov_entity]
 
     camera_x, camera_y = (player.x, player.y)
 
@@ -86,7 +100,7 @@ def play_arena():
         the_map.render(game_con, fov_map, camera_x, camera_y, player.x, player.y, *player_facing_point)
         
         # Only entities in the player's line of sight should be drawn
-        for _entity in entity_list:
+        for _entity in reversed(entity_list):
             if fov.in_player_fov(_entity.x, _entity.y, player.x, player.y, mouse_status.cx + camera_x,
                                  mouse_status.cy + camera_y, fov_map):
                 _entity.render(game_con, camera_x, camera_y)
@@ -102,7 +116,7 @@ def play_arena():
             tcod.console_clear(ui_con)
             ui.draw_checkerboard(ui_con, constant.INENTORY_SIZE[0], constant.INENTORY_SIZE[1],
                                  constant.SQUARE_SIZE, tcod.grey, tcod.dark_grey)
-            tcod.image_blit_2x(test, ui_con, 0, 0, 0, 0, -1, -1)
+            ui.draw_inventory_items(ui_con, player.inventory_component)
             if selected_inv_square is not None:
                 tcod.console_print_frame(ui_con, selected_inv_square[0] * constant.SQUARE_SIZE,
                                                  selected_inv_square[1] * constant.SQUARE_SIZE,
@@ -133,6 +147,15 @@ def play_arena():
                     fov_recompute = True
             elif key.c == ord("i"):
                 in_menu = "inventory"
+            elif key.c == ord(","):
+                for _entity in entity_list:
+                    if (_entity.item_component is not None and
+                            _entity.x == player.x and
+                            _entity.y == player.y):
+                        player.inventory_component.add(_entity.item_component)
+                        entity_list.remove(_entity)
+                        
+                                                              
             elif key.vk == tcod.KEY_ESCAPE: # Quit back to main menu
                 break
         elif in_menu == "inventory":
@@ -145,7 +168,6 @@ def play_arena():
                 elif not ((0 <= selected_inv_square[0] < constant.INENTORY_SIZE[0]) and
                           (0 <= selected_inv_square[1] < constant.INENTORY_SIZE[1])):
                     selected_inv_square = prev_square
-                print (mouse_status.cx, mouse_status.cy), selected_inv_square
             elif key.c == ord("i"):
                 in_menu = ""
 
@@ -177,6 +199,7 @@ while not tcod.console_is_window_closed():
 
                 if option == "ENTER":
                     if gamemode_menu_index == 0:
+                        #cProfile.run("play_arena()", "profile")
                         play_arena()
                         tcod.image_blit_2x(img, game_con, 0, 0)
                 elif option == "ESCAPE":

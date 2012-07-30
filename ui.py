@@ -51,6 +51,19 @@ def draw_checkerboard(console, width, height, square_size, color1, color2):
             else:
                 draw_rectangle(console, color2, x, y, square_size)
 
+def draw_inventory_items(console, inventory):
+    drawn_positions = []
+
+    for y in xrange(inventory.height):
+        for x in xrange(inventory.width):
+            if (x, y) in drawn_positions or inventory.grid[y][x] is None:
+                continue
+            tcod.image_blit_2x(inventory.grid[y][x].image(), console,
+                               x * constant.SQUARE_SIZE, y * constant.SQUARE_SIZE)
+            for dy in xrange(inventory.grid[y][x].width):
+                for dx in xrange(inventory.grid[y][x].height):
+                    drawn_positions.append((x + dx, y + dy))
+
 def handle_menu_input(key, index, num_options):
     """Handles input while in menus. Returns "ENTER" if enter pushed, "ESCAPE" if escape
     pushed, and the modified index otherwise

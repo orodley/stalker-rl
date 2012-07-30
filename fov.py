@@ -24,6 +24,7 @@ def in_player_fov(x, y, player_x, player_y, mouse_x, mouse_y, fov_map):
     # p | # P <- (player_x, player_y)  the square s is out of vision
     #   |/ s
     #   # M   <- (mouse_x, mouse_y)
+
     p = math.sqrt((x        - mouse_x)  ** 2 + (y        - mouse_y)  ** 2)
     s = math.sqrt((player_x - mouse_x)  ** 2 + (player_y - mouse_y)  ** 2)
     m = math.sqrt((x        - player_x) ** 2 + (y        - player_y) ** 2)
@@ -34,8 +35,8 @@ def in_player_fov(x, y, player_x, player_y, mouse_x, mouse_y, fov_map):
     else:
         angle = 0
 
-    if (tcod.map_is_in_fov(fov_map, x, y) and
-        angle < constant.FOV_ANGLE / 2):
+    if (angle < constant.FOV_ANGLE / 2 and
+        tcod.map_is_in_fov(fov_map, x, y)):
         return True
     else: 
         return False

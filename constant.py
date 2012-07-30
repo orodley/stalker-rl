@@ -17,4 +17,5 @@ MAX_CONDITION = 10000    # Perfect condition for a weapon
 CAMERA_DISTANCE = 0      # How far ahead of the player to center the camera
 
 INENTORY_SIZE = (6, 5)   # Size of the inventory grid for the player in squares
+WEIGHT_LIMIT = 35000     # Default weight limit for the player in grams
 SQUARE_SIZE = 15         # How large each square in the grid is
