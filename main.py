@@ -34,6 +34,7 @@ game_con = tcod.console_new(constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT)
 
 tcod.sys_set_fps(constant.LIMIT_FPS)
 tcod.console_set_keyboard_repeat(10, 50)
+tcod.mouse_show_cursor(False)
 
 tcod.console_credits()
 
@@ -113,6 +114,7 @@ def play_arena():
 
         # If in inventory, draw inventory grid
         if in_menu == "inventory":
+            tcod.mouse_show_cursor(True)
             tcod.console_clear(ui_con)
             ui.draw_checkerboard(ui_con, constant.INENTORY_SIZE[0], constant.INENTORY_SIZE[1],
                                  constant.SQUARE_SIZE, tcod.grey, tcod.dark_grey)
@@ -169,6 +171,7 @@ def play_arena():
                           (0 <= selected_inv_square[1] < constant.INENTORY_SIZE[1])):
                     selected_inv_square = prev_square
             elif key.c == ord("i"):
+                tcod.mouse_show_cursor(False)
                 in_menu = ""
 
 main_menu_index = 0

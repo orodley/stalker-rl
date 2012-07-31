@@ -32,7 +32,6 @@ class Map:
                 if fov.in_player_fov(adj_x, adj_y, player_x, player_y, mouse_x + camera_x,
                                      mouse_y + camera_y, fov_map):
                     self.data[adj_y][adj_x].explored = True
-
                     tcod.console_put_char_ex(screen, x, y,
                                              ord(self.data[adj_y][adj_x].char),
                                              self.data[adj_y][adj_x].fore_color,

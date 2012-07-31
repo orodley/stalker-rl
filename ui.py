@@ -31,7 +31,7 @@ def draw_menu(console, header, items, width, height, selected_index):
                                 tcod.BKGND_NONE, truncated_items[pos])
 
 def draw_rectangle(console, color, x, y, width, height=None, flags=tcod.BKGND_SET):
-    """Draw a rectangle on target console. If height no provided, draw a square by default"""
+    """Draw a rectangle on target console. If height is not provided, draw a square by default"""
 
     if height is None:
         height = width

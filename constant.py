@@ -2,7 +2,7 @@ from math import radians
 
 SCREEN_WIDTH = 120       # Width  of window in tiles
 SCREEN_HEIGHT = 79       # Height of window in tiles
-LIMIT_FPS = 30           # FPS cap
+LIMIT_FPS = 0           # FPS cap
 
 TRUNCATE_SUFFIX = "..."  # If a word cannot fit into a menu, it is truncated and this is appended
 
