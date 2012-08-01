@@ -42,7 +42,7 @@ class Map:
                                              self.data[adj_y][adj_x].explored_fore_color,
                                              self.data[adj_y][adj_x].explored_back_color)
                 else:
-                    tcod.console_set_back(screen, x, y, tcod.black)
+                    tcod.console_set_char_background(screen, x, y, tcod.black)
 
 def make_map(width, height):
     """Constructs a new Map"""

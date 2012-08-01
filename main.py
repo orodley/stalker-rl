@@ -32,18 +32,15 @@ ui_con   = tcod.console_new(constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT)
 # Main console that the map and constant UI elements are rendered to
 game_con = tcod.console_new(constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT)
 
-tcod.sys_set_fps(constant.LIMIT_FPS)
+tcod.sys_set_fps(constant.FPS_CAP)
 tcod.console_set_keyboard_repeat(10, 50)
 tcod.mouse_show_cursor(False)
 
 tcod.console_credits()
 
 img = tcod.image_load(os.path.join('images', 'menu_background.png'))
-#img2 = tcod.image_load(os.path.join('images', 'test.png'))
-#tcod.image_set_key_color(img2, tcod.pink)
 tcod.image_blit_2x(img, game_con, 0, 0)
-#tcod.image_blit(img2, game_con, 10, 10, tcod.BKGND_SET, 1, 1, 0)
-tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
+tcod.console_blit(game_con, 0, 0, 0, 0, 0, 0, 0)
 tcod.console_flush()
 
 def play_arena():
@@ -78,12 +75,13 @@ def play_arena():
     test = tcod.image_load(os.path.join("images", "weapons", "Makarov PM.png"))
     tcod.image_set_key_color(test, tcod.pink)
 
+    # Set initial values for key and mouse event; required to pass into sys_check_for_event
+    key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
     mouse_status = tcod.mouse_get_status()
     
     while True:
         # Get input
-        key = tcod.console_check_for_keypress(tcod.KEY_PRESSED)
-        mouse_status = tcod.mouse_get_status()
+        tcod.sys_check_for_event(tcod.EVENT_KEY_PRESS | tcod.EVENT_MOUSE, key, mouse_status)
 
         if not in_menu:
             # Update camera. This must be done before rendering
@@ -107,10 +105,10 @@ def play_arena():
                 _entity.render(game_con, camera_x, camera_y)
 
         # fps display
-        tcod.console_print_right(game_con, constant.SCREEN_WIDTH - 1, 0, tcod.BKGND_NONE, str(tcod.sys_get_fps()))
+        tcod.console_print_ex(game_con, constant.SCREEN_WIDTH - 1, 0, tcod.BKGND_NONE, tcod.RIGHT, str(tcod.sys_get_fps()))
         
         # Finally, blit the console
-        tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
+        tcod.console_blit(game_con, 0, 0, 0, 0, 0, 0, 0)
 
         # If in inventory, draw inventory grid
         if in_menu == "inventory":
@@ -178,7 +176,7 @@ main_menu_index = 0
 while not tcod.console_is_window_closed():
     tcod.image_blit_2x(img, game_con, 0, 0)
     #tcod.image_blit(img2, game_con, 10, 10, tcod.BKGND_SET, 1, 1, 0)
-    tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
+    tcod.console_blit(game_con, 0, 0, 0, 0, 0, 0, 0)
     tcod.console_clear(ui_con)
     ui.draw_menu(ui_con, "S.T.A.L.K.E.R. RL", ['New Game', 'Load Game', 'Highscores', 'Exit'],
                  MAIN_MENU_WIDTH, MAIN_MENU_HEIGHT, main_menu_index)
@@ -192,7 +190,7 @@ while not tcod.console_is_window_closed():
             gamemode_menu_index = 0
             while True:
                 tcod.image_blit_2x(img, game_con, 0, 0)
-                tcod.console_blit(game_con, 0, 0, constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT, 0, 0, 0)
+                tcod.console_blit(game_con, 0, 0, 0, 0, 0, 0, 0)
                 tcod.console_clear(ui_con)
                 ui.draw_menu(ui_con, "Select game mode", ['Arena'], MAIN_MENU_WIDTH, MAIN_MENU_HEIGHT, main_menu_index)
                 tcod.console_blit(ui_con, 0, 0, MAIN_MENU_WIDTH, MAIN_MENU_HEIGHT, 0, MAIN_MENU_X, MAIN_MENU_Y, 1.0, 0.7)

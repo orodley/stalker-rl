@@ -35,7 +35,7 @@ class Entity:
         """Renders the entity onto screen if it is in camera"""
         if (camera_x <= self.x < camera_x + constant.SCREEN_WIDTH and
             camera_y <= self.y < camera_y + constant.SCREEN_HEIGHT):
-            tcod.console_set_foreground_color(screen, self.fore_color)
+            tcod.console_set_default_foreground(screen, self.fore_color)
             tcod.console_put_char(screen, self.x - camera_x, self.y - camera_y, ord(self.char), tcod.BKGND_NONE)
 
 def check_collision(x, y, a_map, entity_list):

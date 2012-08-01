@@ -15,20 +15,19 @@ def draw_menu(console, header, items, width, height, selected_index):
             truncated_items.append(item)
 
     truncated_header = header if len(header) < width - 2 else header[:width - len(constant.TRUNCATE_SUFFIX) + 2] + constant.TRUNCATE_SUFFIX
-    tcod.console_set_foreground_color(console, tcod.white)
+    tcod.console_set_default_foreground(console, tcod.white)
     tcod.console_print_frame(console, 0, 0, width, height, False, tcod.BKGND_NONE, False) 
 
     if header:
-        tcod.console_print_center(console, width / 2, 0, tcod.BKGND_NONE, truncated_header)
+        tcod.console_print_ex(console, width / 2, 0, tcod.BKGND_NONE, tcod.CENTER, truncated_header)
 
     for pos in xrange(len(truncated_items)):
         if pos == selected_index:
-            tcod.console_set_foreground_color(console, tcod.white)
+            tcod.console_set_default_foreground(console, tcod.white)
         else:
-            tcod.console_set_foreground_color(console, tcod.grey)
+            tcod.console_set_default_foreground(console, tcod.grey)
 
-        tcod.console_print_left(console, 1, pos + 1,
-                                tcod.BKGND_NONE, truncated_items[pos])
+        tcod.console_print_ex(console, 1, pos + 1, tcod.BKGND_NONE, tcod.LEFT, truncated_items[pos])
 
 def draw_rectangle(console, color, x, y, width, height=None, flags=tcod.BKGND_SET):
     """Draw a rectangle on target console. If height is not provided, draw a square by default"""
@@ -37,7 +36,7 @@ def draw_rectangle(console, color, x, y, width, height=None, flags=tcod.BKGND_SE
         height = width
     for _y in xrange(y, y + height):
         for _x in xrange(x, x + width):
-            tcod.console_set_back(console, _x, _y, color, flags)
+            tcod.console_set_char_background(console, _x, _y, color, flags)
 
 def draw_checkerboard(console, width, height, square_size, color1, color2):
     """Draws a checkerboard pattern on the specified console.
