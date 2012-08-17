@@ -6,11 +6,9 @@ SCREEN_HEIGHT = 79       # Height of window in tiles
 INVENTORY_X = 2 # Position to draw inventory menu at
 INVENTORY_Y = 2
 
-FPS_CAP = 0
+FPS_CAP = 30
 
 TRUNCATE_SUFFIX = "..."  # If a word cannot fit into a menu, it is truncated and this is appended
-
-COLOR_VARIATION = 15     # r, g, and b variation to apply for tiles
 
 MEMORY_TINT = 0.2        # r, g, and b tint for previously, but not currently seen tiles
 

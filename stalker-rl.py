@@ -35,7 +35,6 @@ tcod.console_flush()
 main_menu_index = 0
 while not tcod.console_is_window_closed():
     tcod.image_blit_2x(img, game_con, 0, 0)
-    #tcod.image_blit(img2, game_con, 10, 10, tcod.BKGND_SET, 1, 1, 0)
     tcod.console_blit(game_con, 0, 0, 0, 0, 0, 0, 0)
     tcod.console_clear(ui_con)
     ui.draw_menu(ui_con, "S.T.A.L.K.E.R. RL", ['New Game', 'Load Game', 'Highscores', 'Exit'],
@@ -60,7 +59,7 @@ while not tcod.console_is_window_closed():
 
                 if option == "ENTER":
                     if gamemode_menu_index == 0:
-                        main.play_arena(game_con, ui_con)
+                        main.play_arena(ui_con)
                         tcod.image_blit_2x(img, game_con, 0, 0)
                 elif option == "ESCAPE":
                     break

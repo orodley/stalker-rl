@@ -9,7 +9,9 @@ import fov
 import item
 import item_types
 
-def play_arena(game_con, ui_con):
+def play_arena(ui_con):
+    console_buffer = tcod.ConsoleBuffer(constant.SCREEN_WIDTH, constant.SCREEN_HEIGHT)
+
     map_size = (constant.SCREEN_WIDTH * 1, constant.SCREEN_HEIGHT * 1)
     the_map = game_map.make_map(*map_size)
     fov_map = tcod.map_new(*map_size)
@@ -61,19 +63,18 @@ def play_arena(game_con, ui_con):
         fov.update_entity_fov(entity_list, the_map, fov_map)
 
         # Render the map and entities
-        the_map.render(game_con, fov_map, camera_x, camera_y, player.x, player.y, *player_facing_point)
+        the_map.render(console_buffer, fov_map, camera_x, camera_y, player.x, player.y, *player_facing_point)
+        console_buffer.blit(0)
         
         # Only entities in the player's line of sight should be drawn
         for _entity in reversed(entity_list):
             if fov.in_player_fov(_entity.x, _entity.y, player.x, player.y, mouse_status.cx + camera_x,
                                  mouse_status.cy + camera_y, fov_map):
-                _entity.render(game_con, camera_x, camera_y)
+                _entity.render(0, camera_x, camera_y)
 
         # fps display
-        tcod.console_print_ex(game_con, constant.SCREEN_WIDTH - 1, 0, tcod.BKGND_NONE, tcod.RIGHT, str(tcod.sys_get_fps()))
+        tcod.console_print_ex(0, constant.SCREEN_WIDTH - 1, 0, tcod.BKGND_NONE, tcod.RIGHT, str(tcod.sys_get_fps()))
         
-        # Finally, blit the console
-        tcod.console_blit(game_con, 0, 0, 0, 0, 0, 0, 0)
 
         # If in inventory, draw inventory grid
         if in_menu == "inventory":
