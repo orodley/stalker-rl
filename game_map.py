@@ -69,8 +69,7 @@ def make_map(width, height):
         tcod.bsp_split_recursive(bsp_tree, 0, BSP_DEPTH, MIN_ROOM_WIDTH, MIN_ROOM_HEIGHT,
                                  MAX_H_RATIO, MAX_V_RATIO)
 
-        tcod.bsp_traverse_inverted_level_order(bsp_tree, print_node)
-        rectangle(0, 0, HOUSE_WIDTH - 1, HOUSE_HEIGHT - 1, house_array)
+        tcod.bsp_traverse_inverted_level_order(bsp_tree, handle_node)
         house_array[-1][-1] = Tile("wall", True, True)
 
         noise = tcod.noise_new(2, HURST, LACNULARITY)
@@ -79,9 +78,9 @@ def make_map(width, height):
                 if tcod.noise_get_turbulence(noise, [x, y], 32.0, tcod.NOISE_SIMPLEX) > THRESHOLD:
                     house_array[y][x] = Tile("floor", True, True)
 
-    def print_node(node, user_data):
+    def handle_node(node, user_data):
         if tcod.bsp_is_leaf(node):
-            rectangle(node.x, node.y, node.w, node.h, house_array)
+            rectangle(node.x, node.y, node.w + 1, node.h + 1, house_array)
             return True
         else:
             return False
@@ -89,12 +88,41 @@ def make_map(width, height):
     def rectangle(x, y, w, h, array):
         for n in xrange(w):
             array[y][x + n] = Tile("wall", False, False)
-            array[y + h][x + n] = Tile("wall", False, False)
+            array[y + h - 1][x + n] = Tile("wall", False, False)
         for n in xrange(h):
             array[y + n][x] = Tile("wall", False, False)
-            array[y + n][x + w] = Tile("wall", False, False)
+            array[y + n][x + w - 1] = Tile("wall", False, False)
 
     the_map =  Map([[Tile("grass", True, True) for x in xrange(width)] for y in xrange(height)])
+
+    """
+    (t_x, t_y) = (width / 2, height / 2)
+    # A
+    rectangle(t_x, t_y, 1, 10, the_map.data)
+    rectangle(t_x, t_y, 5, 1, the_map.data)
+    rectangle(t_x + 5, t_y, 1, 10, the_map.data)
+    rectangle(t_x, t_y + 5, 5, 1, the_map.data)
+    t_x += 7
+    # G
+    rectangle(t_x, t_y, 1, 10, the_map.data)
+    rectangle(t_x, t_y, 5, 1, the_map.data)
+    rectangle(t_x, t_y + 9, 5, 1, the_map.data)
+    rectangle(t_x + 4, t_y + 5, 1, 5, the_map.data)
+    rectangle(t_x + 2, t_y + 5, 3, 1, the_map.data)
+    t_x += 7
+    # D
+    rectangle(t_x, t_y, 1, 10, the_map.data)
+    rectangle(t_x, t_y, 4, 1, the_map.data)
+    rectangle(t_x + 4, t_y + 1, 1, 9, the_map.data)
+    rectangle(t_x, t_y + 9, 5, 1, the_map.data)
+    t_x += 7
+    # G
+    rectangle(t_x, t_y, 1, 10, the_map.data)
+    rectangle(t_x, t_y, 5, 1, the_map.data)
+    rectangle(t_x, t_y + 9, 5, 1, the_map.data)
+    rectangle(t_x + 4, t_y + 5, 1, 5, the_map.data)
+    rectangle(t_x + 2, t_y + 5, 3, 1, the_map.data)
+    """
 
     house_array = [[Tile("floor", True, True) for x in xrange(HOUSE_WIDTH)] for y in xrange(HOUSE_HEIGHT)]
     make_house()
